@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Comparison App</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6186c1;
+            --accent-color: #f0f4f9;
+            --text-color: #333;
+            --light-text: #666;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --card-bg: #fff;
+            --body-bg: #f5f7fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--body-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #e0e0e0;
+            font-weight: 300;
+        }
+
+        .search-section {
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        .suggestion-item:hover {
+            background-color: var(--accent-color);
+        }
+
+        .weather-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .weather-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .city-name {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--light-text);
+            padding: 5px;
+            transition: color 0.3s;
+        }
+
+        .action-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .favorite-btn.active {
+            color: #f1c40f;
+        }
+
+        .remove-btn:hover {
+            color: var(--danger-color);
+        }
+
+        .weather-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .temp {
+            font-size: 46px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .weather-condition {
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+        }
+
+        .weather-icon {
+            width: 80px;
+            height: 80px;
+            margin: 10px 0;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            background-color: var(--accent-color);
+            border-radius: 6px;
+        }
+
+        .detail-label {
+            font-size: 14px;
+            color: var(--light-text);
+        }
+
+        .detail-value {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .comparison-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .comparison-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .comparison-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .favorites-section {
+            margin-top: 40px;
+        }
+
+        .favorites-title {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .favorites-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .favorite-chip {
+            background-color: var(--accent-color);
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .favorite-chip:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .favorite-chip i {
+            font-size: 14px;
+        }
+
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(74, 111, 165, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            text-align: center;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .success-message {
+            color: var(--success-color);
+            text-align: center;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: var(--light-text);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .weather-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .temp {
+                font-size: 36px;
+            }
+            
+            .details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Weather Comparison App</h1>
+            <p class="subtitle">Search, compare, and save your favorite cities</p>
+        </header>
+
+        <div class="tab-buttons">
+            <button class="tab-btn active" data-tab="search-tab">Search Weather</button>
+            <button class="tab-btn" data-tab="compare-tab">Compare Cities</button>
+        </div>
+
+        <div id="search-tab" class="tab-content active">
+            <div class="search-section">
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="city-input" placeholder="Enter city name...">
+                        <div class="search-suggestions" id="search-suggestions"></div>
+                    </div>
+                    <button id="search-btn"><i class="fas fa-search"></i> Search</button>
+                </div>
+                <div id="search-error" class="error-message"></div>
+            </div>
+
+            <div class="weather-cards" id="weather-display"></div>
+        </div>
+
+        <div id="compare-tab" class="tab-content">
+            <div class="search-section">
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="city-input-1" placeholder="Enter first city...">
+                        <div class="search-suggestions" id="search-suggestions-1"></div>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" id="city-input-2" placeholder="Enter second city...">
+                        <div class="search-suggestions" id="search-suggestions-2"></div>
+                    </div>
+                    <button id="compare-btn"><i class="fas fa-balance-scale"></i> Compare</button>
+                </div>
+                <div id="compare-error" class="error-message"></div>
+            </div>
+
+            <div class="comparison-section" id="comparison-section">
+                <h2 class="comparison-title">Weather Comparison</h2>
+                <div class="comparison-cards" id="comparison-display"></div>
+            </div>
+        </div>
+
+        <div class="favorites-section" id="favorites-section">
+            <h2 class="favorites-title"><i class="fas fa-star"></i> Favorite Cities</h2>
+            <div class="favorites-list" id="favorites-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // API key for OpenWeatherMap - in production, this should be secured
+        const API_KEY = '736348fa40dba1d5ef82f86a39a15ceb';
+        const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
+        
+        // DOM Elements
+        const cityInput = document.getElementById('city-input');
+        const cityInput1 = document.getElementById('city-input-1');
+        const cityInput2 = document.getElementById('city-input-2');
+        const searchBtn = document.getElementById('search-btn');
+        const compareBtn = document.getElementById('compare-btn');
+        const weatherDisplay = document.getElementById('weather-display');
+        const comparisonSection = document.getElementById('comparison-section');
+        const comparisonDisplay = document.getElementById('comparison-display');
+        const favoritesList = document.getElementById('favorites-list');
+        const searchError = document.getElementById('search-error');
+        const compareError = document.getElementById('compare-error');
+        const searchSuggestions = document.getElementById('search-suggestions');
+        const searchSuggestions1 = document.getElementById('search-suggestions-1');
+        const searchSuggestions2 = document.getElementById('search-suggestions-2');
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Persistent storage utility that works in sandboxed environments
+        const storage = {
+            data: {}, // In-memory fallback
+            
+            save: function(key, value) {
+                // Always keep in memory
+                this.data[key] = value;
+                
+                // Try browser storage mechanisms
+                const stringValue = JSON.stringify(value);
+                try {
+                    localStorage.setItem(key, stringValue);
+                    return true;
+                } catch (e) {
+                    try {
+                        sessionStorage.setItem(key, stringValue);
+                        return true;
+                    } catch (e2) {
+                        return false;
+                    }
+                }
+            },
+            
+            get: function(key, defaultValue = null) {
+                // Try storage mechanisms first
+                try {
+                    const value = localStorage.getItem(key);
+                    if (value !== null) {
+                        return JSON.parse(value);
+                    }
+                } catch (e) {
+                    try {
+                        const value = sessionStorage.getItem(key);
+                        if (value !== null) {
+                            return JSON.parse(value);
+                        }
+                    } catch (e2) {
+                        // Fall through to in-memory
+                    }
+                }
+                
+                // Return from memory or default
+                return this.data.hasOwnProperty(key) ? this.data[key] : defaultValue;
+            }
+        };
+
+        // Initial Setup with robust storage solution
+        let favorites = storage.get('favoriteWeatherCities', []);
+        displayFavorites();
+
+        // Event Listeners
+        searchBtn.addEventListener('click', searchWeather);
+        compareBtn.addEventListener('click', compareWeather);
+        cityInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchWeather();
+        });
+
+        // Tab functionality
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                
+                // Remove active class from all buttons and tabs
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to current button and tab
+                button.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Functions
+        async function searchWeather() {
+            const city = cityInput.value.trim();
+            if (!city) {
+                showError(searchError, "Please enter a city name");
+                return;
+            }
+            
+            try {
+                showError(searchError, "");
+                const weatherCard = createLoadingCard();
+                weatherDisplay.innerHTML = '';
+                weatherDisplay.appendChild(weatherCard);
+                
+                const weatherData = await fetchWeatherData(city);
+                weatherDisplay.innerHTML = '';
+                weatherDisplay.appendChild(createWeatherCard(weatherData));
+            } catch (error) {
+                weatherDisplay.innerHTML = '';
+                showError(searchError, error.message);
+            }
+        }
+
+        async function compareWeather() {
+            const city1 = cityInput1.value.trim();
+            const city2 = cityInput2.value.trim();
+            
+            if (!city1 || !city2) {
+                showError(compareError, "Please enter both city names");
+                return;
+            }
+            
+            try {
+                showError(compareError, "");
+                comparisonDisplay.innerHTML = '';
+                comparisonSection.style.display = 'block';
+                
+                const card1 = createLoadingCard();
+                const card2 = createLoadingCard();
+                comparisonDisplay.appendChild(card1);
+                comparisonDisplay.appendChild(card2);
+                
+                const [weatherData1, weatherData2] = await Promise.all([
+                    fetchWeatherData(city1),
+                    fetchWeatherData(city2)
+                ]);
+                
+                comparisonDisplay.innerHTML = '';
+                comparisonDisplay.appendChild(createWeatherCard(weatherData1));
+                comparisonDisplay.appendChild(createWeatherCard(weatherData2));
+            } catch (error) {
+                comparisonDisplay.innerHTML = '';
+                showError(compareError, error.message);
+            }
+        }
+
+        async function fetchWeatherData(city) {
+            const url = `${WEATHER_BASE_URL}?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error(`City "${city}" not found. Please check the spelling and try again.`);
+                }
+                throw new Error(`Failed to fetch weather data: ${response.statusText}`);
+            }
+            
+            return await response.json();
+        }
+
+        function createWeatherCard(data) {
+            const card = document.createElement('div');
+            card.className = 'weather-card';
+            
+            const cityId = data.id.toString();
+            const isFavorite = favorites.includes(cityId);
+            
+            card.innerHTML = `
+                <div class="card-header">
+                    <h3 class="city-name">${data.name}, ${data.sys.country}</h3>
+                    <div class="card-actions">
+                        <button class="action-btn favorite-btn ${isFavorite ? 'active' : ''}" 
+                                data-city-id="${cityId}" 
+                                data-city-name="${data.name}"
+                                title="${isFavorite ? 'Remove from favorites' : 'Add to favorites'}">
+                            <i class="fas fa-star"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="weather-info">
+                    <img class="weather-icon" src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="${data.weather[0].description}">
+                    <div class="temp">${Math.round(data.main.temp)}°C</div>
+                    <div class="weather-condition">${data.weather[0].description}</div>
+                    <div class="details">
+                        <div class="detail-item">
+                            <span class="detail-label">Humidity</span>
+                            <span class="detail-value">${data.main.humidity}%</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Wind</span>
+                            <span class="detail-value">${data.wind.speed} m/s</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Pressure</span>
+                            <span class="detail-value">${data.main.pressure} hPa</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Feels Like</span>
+                            <span class="detail-value">${Math.round(data.main.feels_like)}°C</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listener for favorite button
+            const favoriteBtn = card.querySelector('.favorite-btn');
+            favoriteBtn.addEventListener('click', toggleFavorite);
+            
+            return card;
+        }
+
+        function createLoadingCard() {
+            const card = document.createElement('div');
+            card.className = 'weather-card';
+            card.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+                <div class="card-header">
+                    <h3 class="city-name">Loading...</h3>
+                </div>
+                <div class="weather-info">
+                    <div class="temp">--°C</div>
+                    <div class="weather-condition">Please wait</div>
+                </div>
+            `;
+            return card;
+        }
+
+        function toggleFavorite(e) {
+            const btn = e.currentTarget;
+            const cityId = btn.getAttribute('data-city-id');
+            const cityName = btn.getAttribute('data-city-name');
+            
+            const index = favorites.indexOf(cityId);
+            
+            if (index === -1) {
+                // Add to favorites
+                favorites.push(cityId);
+                btn.classList.add('active');
+                btn.title = 'Remove from favorites';
+                showSuccessMessage(`Added ${cityName} to favorites`);
+            } else {
+                // Remove from favorites
+                favorites.splice(index, 1);
+                btn.classList.remove('active');
+                btn.title = 'Add to favorites';
+                showSuccessMessage(`Removed ${cityName} from favorites`);
+            }
+            
+            // Save to storage
+            storage.save('favoriteWeatherCities', favorites);
+            
+            // Update favorites display
+            displayFavorites();
+        }
+
+        function displayFavorites() {
+            favoritesList.innerHTML = '';
+            
+            if (favorites.length === 0) {
+                const message = document.createElement('p');
+                message.textContent = 'No favorite cities yet. Add some by clicking the star icon!';
+                favoritesList.appendChild(message);
+                return;
+            }
+            
+            const fetchFavorites = favorites.map(async (cityId) => {
+                try {
+                    const url = `${WEATHER_BASE_URL}?id=${cityId}&appid=${API_KEY}&units=metric`;
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch favorite city: ${response.statusText}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error(`Error fetching favorite city ${cityId}:`, error);
+                    return null;
+                }
+            });
+            
+            Promise.all(fetchFavorites).then(results => {
+                // Filter out null results from failed requests
+                const validResults = results.filter(result => result !== null);
+                
+                validResults.forEach(data => {
+                    const chip = document.createElement('div');
+                    chip.className = 'favorite-chip';
+                    chip.innerHTML = `
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>${data.name}</span>
+                        <span>${Math.round(data.main.temp)}°C</span>
+                    `;
+                    
+                    chip.addEventListener('click', () => {
+                        cityInput.value = data.name;
+                        searchWeather();
+                        
+                        // Switch to search tab if needed
+                        tabButtons[0].click();
+                    });
+                    
+                    favoritesList.appendChild(chip);
+                });
+            });
+        }
+
+        function showError(element, message) {
+            element.textContent = message;
+            element.style.display = message ? 'block' : 'none';
+        }
+
+        function showSuccessMessage(message) {
+            const successEl = document.createElement('div');
+            successEl.className = 'success-message';
+            successEl.textContent = message;
+            
+            // Insert after search box
+            document.querySelector('.search-section').appendChild(successEl);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                successEl.remove();
+            }, 3000);
+        }
+
+        // Call initial display of favorites
+        displayFavorites();
+
+        // Initialize city autocomplete
+        function setupCityAutocomplete(inputElement, suggestionsElement) {
+            // Hardcoded list of common cities since external fetch might be blocked
+            const cities = [
+                { name: "London", country: "GB" },
+                { name: "New York", country: "US" },
+                { name: "Tokyo", country: "JP" },
+                { name: "Paris", country: "FR" },
+                { name: "Berlin", country: "DE" },
+                { name: "Rome", country: "IT" },
+                { name: "Madrid", country: "ES" },
+                { name: "Sydney", country: "AU" },
+                { name: "Toronto", country: "CA" },
+                { name: "Dubai", country: "AE" },
+                { name: "Beijing", country: "CN" },
+                { name: "Moscow", country: "RU" },
+                { name: "Cairo", country: "EG" },
+                { name: "Mumbai", country: "IN" },
+                { name: "Bangkok", country: "TH" },
+                { name: "Singapore", country: "SG" },
+                { name: "Los Angeles", country: "US" },
+                { name: "Chicago", country: "US" },
+                { name: "Houston", country: "US" },
+                { name: "Mexico City", country: "MX" },
+                { name: "Amsterdam", country: "NL" },
+                { name: "Athens", country: "GR" },
+                { name: "Barcelona", country: "ES" },
+                { name: "Brussels", country: "BE" },
+                { name: "Bucharest", country: "RO" },
+                { name: "Copenhagen", country: "DK" },
+                { name: "Dublin", country: "IE" },
+                { name: "Helsinki", country: "FI" },
+                { name: "Istanbul", country: "TR" },
+                { name: "Lisbon", country: "PT" },
+                { name: "Prague", country: "CZ" },
+                { name: "Stockholm", country: "SE" },
+                { name: "Vienna", country: "AT" }
+            ];
+
+            inputElement.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                
+                if (query.length < 2) {
+                    suggestionsElement.style.display = 'none';
+                    return;
+                }
+                
+                const matches = cities.filter(city => 
+                    city.name.toLowerCase().startsWith(query)
+                ).slice(0, 5);
+                
+                suggestionsElement.innerHTML = '';
+                
+                if (matches.length > 0) {
+                    matches.forEach(city => {
+                        const item = document.createElement('div');
+                        item.className = 'suggestion-item';
+                        item.textContent = `${city.name}, ${city.country}`;
+                        
+                        item.addEventListener('click', () => {
+                            inputElement.value = city.name;
+                            suggestionsElement.style.display = 'none';
+                        });
+                        
+                        suggestionsElement.appendChild(item);
+                    });
+                    
+                    suggestionsElement.style.display = 'block';
+                } else {
+                    suggestionsElement.style.display = 'none';
+                }
+            });
+            
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target !== inputElement) {
+                    suggestionsElement.style.display = 'none';
+                }
+            });
+        }
+
+        // Setup autocomplete for all inputs
+        setupCityAutocomplete(cityInput, searchSuggestions);
+        setupCityAutocomplete(cityInput1, searchSuggestions1);
+        setupCityAutocomplete(cityInput2, searchSuggestions2);
+    </script>
+</body>
+</html>
